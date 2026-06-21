@@ -115,20 +115,20 @@ Deployment success was verified through the following steps and supporting scree
 
 ### 1. Resource Group Created
 
-`screenshots/resource_group_screen.png`
+![Resource Group](screenshots/resource_group_screen.png)
 
 ### 2. Template Validation
 
 Template validated successfully with no errors before deployment.
 
-`screenshots/validate_deployment_screen.png`
+![Template Validation](screenshots/validate_deployment_screen.png)
 
 ### 3. Deployment Execution
 
 ARM template deployed via `az deployment group create`, showing dependency resolution (NSG → VNet → NIC → VM) and a `Succeeded` provisioning state.
 
-`screenshots/deployment_with_arm_screen.png`
-`screenshots/deployment_with_arm1_screen.png`
+![Deployment Execution](screenshots/deployment_with_arm_screen.png)
+![Deployment Execution](screenshots/deployment_with_arm1_screen.png)
 
 ### 4. Deployment Outputs
 
@@ -146,26 +146,26 @@ Retrieved via `az deployment group show --query properties.outputs`, confirming 
 
 All six resources (VM, NIC, NSG, public IP, VNet, OS disk) confirmed in `myResourceGroup` under region East US 2.
 
-`screenshots/resource_group_screen.png`
+![Resources Provisioned in Azure Portal](screenshots/resource_group_screen.png)
 
 ### 6. Connect Blade — SSH Command
 
 Azure Portal's **Connect** blade confirming the public IP, port 22, and the native SSH command for the VM.
 
-`screenshots/connect_methods_screen.png`
+![Connect Blade — SSH Command](screenshots/connect_methods_screen.png)
 
 ### 7. Successful SSH Connection
 
 Connected to the VM over SSH from the local machine, confirming host key acceptance, authentication, and a live Ubuntu 22.04.5 LTS session.
 
-`screenshots/ssh_connect_screen.png`
-`screenshots/ssh_connect1_screen.png`
+![Successful SSH Connection](screenshots/ssh_connect1_screen.png)
+![Successful SSH Connection](screenshots/ssh_connect_screen.png)
 
 ### 8. NSG Inbound/Outbound Rules
 
 Confirmed the NSG attached to the subnet allows only SSH (port 22) inbound, with default deny-all rules otherwise in place.
 
-`screenshots/ngs_screen.png`
+![NSG Inbound/Outbound Rules](screenshots/ngs_screen.png)
 
 ## Author
 
