@@ -30,10 +30,10 @@ The template provisions the following resources:
 
 ```
 .
-├── azuredeploy.json       # Main ARM template
-├── azuredeploy.parameters.json  # Parameter values for deployment
-├── screenshots/           # Deployment and connectivity verification proof
-├── outputs.log            # Deployment output log (Public IP, Resource IDs)
+├── azuredeploy.json               # Main ARM template
+├── azuredeploy.parameters.json    # Parameter values for deployment
+├── screenshots/                   # Deployment and connectivity verification proof
+├── outputs.log                    # Deployment output log (Public IP, Resource IDs)
 └── README.md
 ```
 
@@ -50,7 +50,7 @@ The template provisions the following resources:
 ```bash
 az group create \
   --name myResourceGroup \
-  --location eastus
+  --location eastus2
 ```
 
 ### 2. Validate the Template
@@ -84,7 +84,7 @@ az deployment group show \
 ### 5. Connect to the VM
 
 ```bash
-ssh <adminUsername>@<publicIPAddress>
+ssh azureuser@<publicIPAddress>
 ```
 
 ## Key ARM Template Concepts Applied
@@ -97,25 +97,75 @@ ssh <adminUsername>@<publicIPAddress>
 
 ## Security Considerations
 
-- An NSG is attached to restrict inbound traffic to only the necessary ports (e.g., 22 for SSH or 3389 for RDP).
-- SSH key-based authentication is used in place of password authentication where possible.
-- Sensitive parameters (e.g., admin password) are marked with the `secureString` type to prevent exposure in logs or the portal.
+- An NSG is attached to restrict inbound traffic to only the necessary ports (port 22 for SSH).
+- Sensitive parameters (e.g., admin password/key) are marked with the `secureString` type to prevent exposure in logs or the portal.
+- Inbound rules were reviewed in the Azure Portal to confirm only the intended SSH rule is open, with all other inbound traffic denied by default.
 
 ## Troubleshooting Notes
 
-Common issues encountered and resolved during this project included:
+Issues encountered and resolved during this project:
 
-- **Validation errors** from malformed JSON or missing required properties — resolved by checking template syntax against ARM schema documentation.
-- **Dependency errors** caused by resources referencing others that hadn't yet been created — resolved using `dependsOn`.
-- **Deployment failures** due to naming conflicts or region/SKU availability — resolved by adjusting parameter values.
+- **`SkuNotAvailable` error** — `Standard_B1s` had no available capacity in `eastus`. Resolved by switching the deployment region to `eastus2`.
+- **Dependency ordering** — handled using `dependsOn` so the NIC and public IP exist before the VM is created.
+- **SSH host key verification prompt** — expected on first connection to a new VM; accepted the host fingerprint to proceed.
 
 ## Verification
 
-Deployment success was verified by:
+Deployment success was verified through the following steps and supporting screenshots in `/screenshots`:
 
-1. Confirming a `Succeeded` provisioning state via `az deployment group show`.
-2. Connecting to the VM over SSH using its public IP address.
-3. Capturing screenshots of the deployed resources in the Azure Portal (see `/screenshots`).
+### 1. Resource Group Created
+
+`screenshots/resource_group_screen.png`
+
+### 2. Template Validation
+
+Template validated successfully with no errors before deployment.
+
+`screenshots/validate_deployment_screen.png`
+
+### 3. Deployment Execution
+
+ARM template deployed via `az deployment group create`, showing dependency resolution (NSG → VNet → NIC → VM) and a `Succeeded` provisioning state.
+
+`screenshots/deployment_with_arm_screen.png`
+`screenshots/deployment_with_arm1_screen.png`
+
+### 4. Deployment Outputs
+
+Retrieved via `az deployment group show --query properties.outputs`, confirming the public IP address, generated SSH command, and VM resource ID.
+
+```json
+{
+  "publicIPAddress": { "value": "20.110.158.73" },
+  "sshCommand": { "value": "ssh azureuser@20.110.158.73" },
+  "vmResourceId": { "value": "/subscriptions/.../resourceGroups/myResourceGroup/providers/Microsoft.Compute/virtualMachines/bashlaw-vm" }
+}
+```
+
+### 5. Resources Provisioned in Azure Portal
+
+All six resources (VM, NIC, NSG, public IP, VNet, OS disk) confirmed in `myResourceGroup` under region East US 2.
+
+`screenshots/resource_group_screen.png`
+
+### 6. Connect Blade — SSH Command
+
+Azure Portal's **Connect** blade confirming the public IP, port 22, and the native SSH command for the VM.
+
+`screenshots/connect_methods_screen.png`
+
+### 7. Successful SSH Connection
+
+Connected to the VM over SSH from the local machine, confirming host key acceptance, authentication, and a live Ubuntu 22.04.5 LTS session.
+
+`screenshots/ssh_connect_screen.png`
+`screenshots/ssh_connect1_screen.png`
+
+### 8. NSG Inbound/Outbound Rules
+
+Confirmed the NSG attached to the subnet allows only SSH (port 22) inbound, with default deny-all rules otherwise in place.
+
+`screenshots/ngs_screen.png`
 
 ## Author
 
